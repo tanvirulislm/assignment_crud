@@ -78,8 +78,8 @@
           <div class="flex flex-col">
             <label for="productDetails" class="text-lg font-semibold text-gray-700 mb-2">Product Details</label>
             <textarea
-              name="details"
-              id="productDetails" value="{{old('details')}}"
+              name="description"
+              id="productDetails" value="{{old('description')}}"
               rows="4"
               class="border border-gray-300 px-3 py-2 text-gray-800 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
           </div>

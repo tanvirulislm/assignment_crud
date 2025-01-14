@@ -68,36 +68,43 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Table body content goes here -->
             @foreach ($products as $product)
             <tr class="border-b border-gray-200 hover:bg-gray-50">
               <td class="px-3 py-4 text-base text-gray-700"> {{$loop->iteration}}</td>
               <td class="px-6 py-4 text-base text-gray-700">{{$product->name}}</td>
-              <td class="px-6 py-4 text-base text-gray-700">{{$product->description}}</td>
+              <td class="px-6 py-4 text-base text-gray-700">{{Str::limit($product->description, 90, '...')}}</td>
               <td class="px-6 py-4 text-base text-gray-700">{{$product->price}}</td>
               <td class="px-6 py-4 text-base text-gray-700">{{$product->stock}}</td>
               <td class="px-6 py-4 text-base text-gray-700">
-                <img src="{{ asset('images/' . $product->image) }}" alt="" class="w-12 h-12 rounded-full object-cover" />
+                <img src="{{ asset('images/' . $product->image) }}" alt="" class="w-12 h-12 rounded-full border-blue-600 border-2 object-cover" />
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700 flex items-center space-x-2">
-                <a href="" class="flex items-center px-2 py-1 text-white bg-blue-600 rounded text-sm hover:bg-blue-700">
-                  <i data-feather="eye" class="w-4 h-4 mr-1"></i>
-                  Show
-                </a>
-                <a
-                  href=""
-                  class="flex items-center px-2 py-1 text-white bg-green-600 rounded text-sm hover:bg-green-700">
-                  <i data-feather="edit" class="w-4 h-4 mr-1"></i>
-                  Edit
-                </a>
-                <a href="" class="flex items-center px-2 py-1 text-white bg-red-600 rounded text-sm hover:bg-red-700">
-                  <i data-feather="trash" class="w-4 h-4 mr-1"></i>
-                  Delete
-                </a>
+              <td class="px-6 py-4 text-sm text-gray-700">
+              <div class="flex items-center space-x-2">
+                  <!-- Show Button -->
+                  <a href="" class="flex items-center px-2 py-1 text-white bg-blue-600 rounded text-sm hover:bg-blue-700">
+                      <i data-feather="eye" class="w-4 h-4 mr-1"></i>
+                      Show
+                  </a>
+
+                  <!-- Edit Button -->
+                  <a href="{{ route('products.edit', $product->id) }}" class="flex items-center px-2 py-1 text-white bg-green-600 rounded text-sm hover:bg-green-700">
+                      <i data-feather="edit" class="w-4 h-4 mr-1"></i>
+                      Edit
+                  </a>
+
+                  <!-- Delete Button (Form) -->
+                  <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="inline-block">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="flex items-center px-2 py-1 text-white bg-red-600 rounded text-sm hover:bg-red-700">
+                          <i data-feather="trash" class="w-4 h-4 mr-1"></i>
+                          Delete
+                      </button>
+                  </form>
+              </div>
               </td>
             </tr>
             @endforeach
-            <!-- Add more rows as needed -->
           </tbody>
         </table>
       </div>
