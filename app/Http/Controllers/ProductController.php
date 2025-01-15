@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
-    function index(Request $request)
-    { 
-        $products = Product::all();
-        return view('index', ['products' => $products]);
+    function index(Request $request){ 
+        $sortColumn = $request->get('sort_column', 'name');
+        $sortDirection = $request->get('sort_direction', 'asc');
+        $products = Product::orderBy($sortColumn, $sortDirection)->paginate(5);
+        $totalProducts = Product::count();
+        return view('index', compact('products', 'totalProducts', 'sortColumn', 'sortDirection'));
     }
 
     function create()
@@ -42,48 +45,64 @@ class ProductController extends Controller
         ]);
 
         $input = $request->all();
+        $randomId = rand(1000, 9999);
+        $input['product_id'] = $randomId;
 
-        if ($image = $request->file('image')) {
-            $profileImage = $image->store('public/images');
-            $input['image'] = basename($profileImage);
+         // Handle image upload
+         if ($image = $request->file('image')) {
+            $destinationPath = 'images/';
+            $profileImage = time() . '.' . $image->extension();
+            $image->move($destinationPath, $profileImage);
+            $input['image'] = $profileImage;
         }
 
         Product::create($input);
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
-    function update(Request $request, Product $product)
-    {
-        $validate = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+    function update(Request $request, $id){
+        $request->validate([
+            'name' => 'required',
+            'description' => 'nullable',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $input = $request->all();
+       $product = Product::findOrFail($id);
+       $input = $request->all();
+
+        unset($input['product_id']);
+
 
         if ($image = $request->file('image')) {
-            if ($product->image && Storage::exists('public/images/' . $product->image)) {
-                Storage::delete('public/images/' . $product->image);
+            if ($product->image && File::exists('images/' . $product->image)) {
+                File::delete('images/' . $product->image);
             }
-            $profileImage = $image->store('public/images');
-            $input['image'] = basename($profileImage);
-        } else {
-            $input['image'] = $product->image;
-        }
 
+            $destinationPath = 'images/';
+            $profileImage = time() . "." . $image->getClientOriginalExtension();
+            $image->move($destinationPath, $profileImage);
+            $input['image'] = $profileImage;
+        }
+        // dd($request->name);
         $product->update($input);
+
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    function destroy($id){
+    function destroy($id) {
         $product = Product::findOrFail($id);
-        if ($product->image && Storage::exists('public/images/' . $product->image)) {
-            Storage::delete('public/images/' . $product->image);
+        if ($product->image && file_exists(public_path('images/' . $product->image))) {
+            unlink(public_path('images/' . $product->image));
         }
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+    }    
+
+    function search(Request $request) {
+        $query = $request->input('query');
+        $products = Product::where('name', 'like', '%' . $query . '%')->orWhere('price', 'like', '%' . $query . '%')->get();
+        return response()->json($products);
     }
 }

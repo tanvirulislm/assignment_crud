@@ -33,27 +33,33 @@
         <!-- First Row: Product Name, Stock, Price -->
         <div class="flex flex-col">
           <label for="productName" class="text-lg font-semibold text-gray-700 mb-2">Product Name</label>
-          <div class="text-gray-800">Akij Biri</div>
+          <div class="text-gray-800">{{ $product->name }}</div>
         </div>
 
         <div class="flex flex-col">
           <label for="stock" class="text-lg font-semibold text-gray-700 mb-2">Stock</label>
-          <div class="text-gray-800">140</div>
+          <div class="text-gray-800">{{ $product->stock }}</div>
         </div>
 
         <div class="flex flex-col">
           <label for="price" class="text-lg font-semibold text-gray-700 mb-2">Price</label>
-          <div class="text-gray-800">841</div>
+          <div class="text-gray-800">{{ $product->price }}</div>
         </div>
 
         <!-- Second Row: Product Details and Image -->
         <div class="lg:col-span-3 flex flex-col">
           <label for="productDetails" class="text-lg font-semibold text-gray-700 mb-2">Product Details</label>
-          <div class="text-gray-800 mb-4">Its Causes Cancer</div>
+          <div class="text-gray-800 mb-4">
+            @if($product->description)
+              {{ $product->description }}
+            @else
+              No Description Available
+            @endif
+          </div>
 
           <label for="productImage" class="text-lg font-semibold text-gray-700 mb-2">Product Image</label>
           <img
-            src="https://placehold.co/500x400"
+            src="{{asset('images/'.$product->image)}}"
             alt="Product Image"
             class="w-60 h-auto rounded" />
         </div>

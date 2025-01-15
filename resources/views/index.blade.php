@@ -52,16 +52,33 @@
             <tr>
               <th class="text-left px-3 py-3 text-lg font-medium text-gray-600 w-16">No</th>
               <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-1/4">
-                <a href="#" class="flex items-center">
-                    Name
-                    <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-                </a>
+              <a class="flex items-center" href="?sort_column=name&sort_direction={{ ($sortColumn == 'name' && $sortDirection == 'asc') ? 'desc' : 'asc' }}">
+                  Name
+                  @if($sortColumn == 'name')
+                      @if($sortDirection == 'asc')
+                          <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
+                      @else
+                          <i data-feather="arrow-down" style="width: 15px; height: 15px;"></i>
+                      @endif
+                      @else
+                      <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
+                  @endif
+              </a>
               </th>
               <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/2">Description</th>
-              <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-24"><a href="#" class="flex items-center">
+              <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-24"><a href="?sort_column=price&sort_direction={{ ($sortColumn == 'price' && $sortDirection == 'asc') ? 'desc' : 'asc' }}" class="flex items-center">
                     Price
-                    <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-                </a></th>
+                    @if($sortColumn == 'price')
+                        @if($sortDirection == 'asc')
+                            <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
+                        @else
+                            <i data-feather="arrow-down" style="width: 15px; height: 15px;"></i>
+                        @endif
+                    @else
+                        <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
+                    @endif
+                </a>
+              </th>
               <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-24">Stock</th>
               <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-24">Image</th>
               <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/6">Action</th>
@@ -81,7 +98,7 @@
               <td class="px-6 py-4 text-sm text-gray-700">
               <div class="flex items-center space-x-2">
                   <!-- Show Button -->
-                  <a href="" class="flex items-center px-2 py-1 text-white bg-blue-600 rounded text-sm hover:bg-blue-700">
+                  <a href="{{ route('products.show', $product->id) }}" class="flex items-center px-2 py-1 text-white bg-blue-600 rounded text-sm hover:bg-blue-700">
                       <i data-feather="eye" class="w-4 h-4 mr-1"></i>
                       Show
                   </a>
@@ -108,36 +125,15 @@
           </tbody>
         </table>
       </div>
-
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4">
-        <p class="text-base text-gray-600">
-          Showing <span class="font-semibold">1</span> to <span class="font-semibold">5</span> of
-          <span class="font-semibold">10</span> Results
-        </p>
-        <div class="flex space-x-1">
-          <a
-            href="#"
-            class="flex items-center justify-center px-3 py-1 bg-gray-200 text-gray-600 rounded text-sm hover:bg-gray-300">
-            <i data-feather="chevron-left" class="w-4 h-4"></i>
-          </a>
-          <a
-            href="#"
-            class="flex items-center justify-center px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-            1
-          </a>
-          <a
-            href="#"
-            class="flex items-center justify-center px-3 py-1 bg-gray-200 text-gray-600 rounded text-sm hover:bg-gray-300">
-            2
-          </a>
-          <a
-            href="#"
-            class="flex items-center justify-center px-3 py-1 bg-gray-200 text-gray-600 rounded text-sm hover:bg-gray-300">
-            <i data-feather="chevron-right" class="w-4 h-4"></i>
-          </a>
+      <div class="flex justify-end items-center mt-4">
+        <div>
+        {{ $products->links('pagination::tailwind') }}
         </div>
+      
       </div>
+
+
     </div>
     <script>
       feather.replace();

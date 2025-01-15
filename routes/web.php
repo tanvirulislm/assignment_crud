@@ -20,7 +20,10 @@ Route::put('/products/{id}', [ProductController::class, 'update'])->name('produc
 Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
 
 // Show
-Route::get('/products/show', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/show/{id}', [ProductController::class, 'show'])->name('products.show');
 
 // Delete
 Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+// Search
+Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
