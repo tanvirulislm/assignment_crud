@@ -17,36 +17,33 @@ class ProductController extends Controller
         return view('index', compact('products', 'totalProducts', 'sortColumn', 'sortDirection'));
     }
 
-    function create()
-    {
+    function create(){
         return view('create');
     }
 
-    function edit($id)
-    {
+    function edit($id){
         $product = Product::findOrFail($id);
         return view('edit', ['product' => $product]);
     }
 
-    function show($id)
-    {
+    function show($id){
         $product = Product::findOrFail($id);
         return view('show', ['product' => $product]);
     }
 
-    function store(Request $request)
-    {
+    function store(Request $request){
         $validate = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
             'stock' => 'required|integer',
+            'price' => 'required|numeric',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
         $input = $request->all();
         $randomId = rand(1000, 9999);
-        $input['product_id'] = $randomId;
+        $productNameSlug = str_replace(' ', '-', strtolower($input['name']));
+        $input['product_id'] = $productNameSlug . '-' . $randomId;
 
          // Handle image upload
          if ($image = $request->file('image')) {
@@ -91,7 +88,7 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    function destroy($id) {
+    function destroy($id){
         $product = Product::findOrFail($id);
         if ($product->image && file_exists(public_path('images/' . $product->image))) {
             unlink(public_path('images/' . $product->image));
