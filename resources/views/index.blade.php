@@ -56,51 +56,35 @@
     <table class="min-w-full table-fixed border-collapse border border-gray-200">
       <thead class="bg-gray-100 border-b border-gray-200">
         <tr>
-          <th class="text-left px-3 py-3 text-lg font-medium text-gray-600 w-16">No</th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-1/4">
+          <th class="text-left px-3 py-3 text-lg font-medium text-gray-600 w-12">No</th>
+          <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-1/5">
           <a class="flex items-center" href="?sort_column=name&sort_direction={{ ($sortColumn == 'name' && $sortDirection == 'asc') ? 'desc' : 'asc' }}">
                   Name
-                  @if($sortColumn == 'name')
-                      @if($sortDirection == 'asc')
-                          <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-                      @else
-                          <i data-feather="arrow-down" style="width: 15px; height: 15px;"></i>
-                      @endif
-                      @else
-                      <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-                  @endif
+                  <i data-feather="{{ $sortColumn == 'name' ? ($sortDirection == 'asc' ? 'arrow-up' : 'arrow-down') : 'arrow-up' }}" style="width: 15px; height: 15px;"></i>
               </a>
           </th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/2">Description</th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-24">
+          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/3">Description</th>
+          <th class="text-left px-6 py-3 text-lg font-medium text-blue-600 w-1/6">
             <a href="?sort_column=price&sort_direction={{ ($sortColumn == 'price' && $sortDirection == 'asc') ? 'desc' : 'asc' }}" class="flex items-center">
               Price
-              @if($sortColumn == 'price')
-                @if($sortDirection == 'asc')
-                  <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-                @else
-                  <i data-feather="arrow-down" style="width: 15px; height: 15px;"></i>
-                @endif
-              @else
-                <i data-feather="arrow-up" style="width: 15px; height: 15px;"></i>
-              @endif
+              <i data-feather="{{ $sortColumn == 'price' ? ($sortDirection == 'asc' ? 'arrow-down' : 'arrow-up') : 'arrow-up' }}" style="width: 15px; height: 15px;"></i>
             </a>
           </th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-24">Stock</th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-24">Image</th>
-          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/6">Action</th>
+          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/8">Stock</th>
+          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/6">Image</th>
+          <th class="text-left px-6 py-3 text-lg font-medium text-gray-600 w-1/8">Action</th>
         </tr>
       </thead>
       <tbody id="search-results">
         @foreach ($products as $product)
         <tr class="border-b border-gray-200 hover:bg-gray-50">
-          <td class="px-3 py-4 text-base text-gray-700"> {{$loop->iteration}}</td>
+          <td class="px-3 py-4 text-base text-gray-700"> {{ ($products->currentPage() - 1) * $products->perPage() + $loop->iteration }}</td>
           <td class="px-6 py-4 text-base text-gray-700">{{$product->name}}</td>
           <td class="px-6 py-4 text-base text-gray-700">{{Str::limit($product->description, 90, '...')}}</td>
           <td class="px-6 py-4 text-base text-gray-700">{{$product->price}}</td>
           <td class="px-6 py-4 text-base text-gray-700">{{$product->stock}}</td>
           <td class="px-6 py-4 text-base text-gray-700">
-            <img src="{{ asset('images/' . $product->image) }}" alt="" class="w-24 h-24 rounded-full border-blue-600 border-2 object-cover" />
+            <img src="{{ asset('images/' . $product->image) }}" alt="" class="w-24 rounded border-blue-600 border-2 object-cover" />
           </td>
           <td class="px-6 py-4 text-sm text-gray-700">
             <div class="flex items-center space-x-2">
@@ -118,7 +102,7 @@
               <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="inline-block">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="flex items-center px-2 py-1 text-white bg-red-600 rounded text-sm hover:bg-red-700">
+                <button type="submit" class="flex items-center px-2 py-1 text-white text-sm rounded bg-red-600 hover:bg-red-700">
                   <i data-feather="trash" class="w-4 h-4 mr-1"></i>
                   Delete
                 </button>
@@ -226,9 +210,6 @@
 
     </div>
     <script>
-      feather.replace();
-    </script>
-    <script>
       $(document).ready(function () {
     $('#search').on('keyup', function () {
         let query = $(this).val();
@@ -236,38 +217,36 @@
         $.ajax({
             url: "{{ route('products.search') }}",
             type: "GET",
-            data: { query: query },
+            data: { query },
             success: function (data) {
-                $('#search-results').empty();  // Clear the previous results
+                const resultsContainer = $('#search-results');
+                resultsContainer.empty(); // Clear previous results
 
-                if (data.length > 0) {
-                    $.each(data, function (index, product) {
-                        $('#search-results').append(`
+                if (data.length) {
+                    data.forEach((product, index) => {
+                        resultsContainer.append(`
                             <tr class="border-b border-gray-200 hover:bg-gray-50">
-                                <td class="px-3 py-4 text-base text-gray-700">${index + 1}</td>
-                                <td class="px-6 py-4 text-base text-gray-700">${product.name}</td>
-                                <td class="px-6 py-4 text-base text-gray-700">${product.description.slice(0, 90)}...</td>
-                                <td class="px-6 py-4 text-base text-gray-700">${product.price}</td>
-                                <td class="px-6 py-4 text-base text-gray-700">${product.stock}</td>
-                                <td class="px-6 py-4 text-base text-gray-700">
-                                    <img src="/images/${product.image}" alt="" class="w-12 h-12 rounded-full border-blue-600 border-2 object-cover" />
+                                <td class="px-3 py-4 text-gray-700">${index + 1}</td>
+                                <td class="px-6 py-4 text-gray-700">${product.name}</td>
+                                <td class="px-6 py-4 text-gray-700">${product.description.slice(0, 90)}...</td>
+                                <td class="px-6 py-4 text-gray-700">${product.price}</td>
+                                <td class="px-6 py-4 text-gray-700">${product.stock}</td>
+                                <td class="px-6 py-4">
+                                    <img src="/images/${product.image}" alt="${product.name}" class="rounded border-2 border-blue-600 object-cover" />
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-700">
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex space-x-2">
                                         <a href="/products/${product.id}" class="flex items-center px-2 py-1 text-white bg-blue-600 rounded text-sm hover:bg-blue-700">
-                                            <i data-feather="eye" class="w-4 h-4 mr-1"></i>
-                                            Show
+                                            <i data-feather="eye" class="w-4 h-4 mr-1"></i> Show
                                         </a>
                                         <a href="/products/${product.id}/edit" class="flex items-center px-2 py-1 text-white bg-green-600 rounded text-sm hover:bg-green-700">
-                                            <i data-feather="edit" class="w-4 h-4 mr-1"></i>
-                                            Edit
+                                            <i data-feather="edit" class="w-4 h-4 mr-1"></i> Edit
                                         </a>
-                                        <form action="/products/${product.id}" method="POST" class="inline-block">
+                                        <form action="/products/${product.id}" method="POST" class="inline">
                                             <input type="hidden" name="_method" value="DELETE" />
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}" />
-                                            <button type="submit" class="flex items-center px-2 py-1 text-white bg-red-600 rounded text-sm hover:bg-red-700">
-                                                <i data-feather="trash" class="w-4 h-4 mr-1"></i>
-                                                Delete
+                                            <button type="submit" class="flex items-center px-2 py-1 text-white text-sm rounded bg-red-600 hover:bg-red-700">
+                                                <i data-feather="trash" class="w-4 h-4 mr-1"></i> Delete
                                             </button>
                                         </form>
                                     </div>
@@ -275,20 +254,28 @@
                             </tr>
                         `);
                     });
+
+                    // Reinitialize Feather icons for the dynamically added content
+                    feather.replace();
                 } else {
-                    $('#search-results').html(`
+                    resultsContainer.html(`
                         <tr>
-                            <td colspan="7" class="px-6 py-4 text-center text-gray-600">
-                                No products found.
-                            </td>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-600">No products found.</td>
                         </tr>
                     `);
                 }
+            },
+            error: function () {
+                alert('Search failed. Please try again.');
             }
         });
     });
 });
 
+    </script>
+     
+     <script>
+      feather.replace();
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </body>
